@@ -1,1 +1,2 @@
-this is my first demo file # Git-demo
+ # Git-demo
+ this is my first demo file
