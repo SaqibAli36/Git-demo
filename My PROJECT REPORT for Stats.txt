@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancer Probability Polygon</title>
+</head>
+<body>
+    <h1>Cancer Probability Polygon</h1>
+    <img src="data:image/png;base64,{{ plot_url }}" alt="Cancer Probability Polygon">
+    <img src="data:image/png;base64,{{ plot_url }}" alt="Graph">
+    <a href="/">Go back to home</a>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+@app.route('/graph')
+def graph():
+    # Generate and render a combined graph with scatter and bar plots
+    df = pd.DataFrame(Patient.query.all())
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 12))
+
+    # Scatter plot with a regression line
+    for duration_unit, group in df.groupby('duration_unit'):
+        axes[0].scatter(group['smoking_duration'], group['probability'], label=f'{duration_unit.capitalize()} Data')
+
+    axes[0].set_xlabel('Smoking Duration (years)', fontsize=12)
+    axes[0].set_ylabel('Cancer Probability', fontsize=12)
+    axes[0].set_title('Cancer Probability Over Time', fontsize=14)
+    axes[0].legend()
+
+    # Bar plot for average probability per duration unit
+    average_probabilities = df.groupby('duration_unit')['probability'].mean()
+    average_probabilities.plot(kind='bar', ax=axes[1], color='green')
+    axes[1].set_xlabel('Duration Unit', fontsize=12)
+    axes[1].set_ylabel('Average Cancer Probability', fontsize=12)
+    axes[1].set_title('Average Cancer Probability by Duration Unit', fontsize=14)
+
+    # Save the plot to a BytesIO object
+    img = BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+
+    # Encode the plot in base64 for embedding in HTML
+    plot_url = base64.b64encode(img.getvalue()).decode()
+
+    return render_template('graph.html', plot_url=plot_url)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculation Result</title>
+    <style>
+        body {
+
+            background-image: url('/static/c.jpg');
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* Center content both vertically and horizontally */
+            min-height: 100vh; /* Ensure the page takes at least the full height of the viewport */
+        }
+
+        h1 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 24px;
+            color: #7E1A5F;
+        }
+
+        p {
+            margin: 5px 0;
+        }
+
+        a {
+            margin-top: 10px;
+            text-decoration: none;
+            color: #0066cc;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Calculation Result</h1>
+    <p><strong>Smoking Duration:</strong> {{ smoking_duration }} {{ duration_unit }}</p>
+    <p><strong>Cancer Probability:</strong> {{ probability }}</p>
+    <a href="/">Go back to home</a>
+</body>
+</html>
+
+
+
+
+
